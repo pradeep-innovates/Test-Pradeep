@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CleverTap Test Bench</title>
+
+  <script type="text/javascript">
+    var clevertap = {
+      event: [],
+      profile: [],
+      account: [],
+      onUserLogin: [],
+      notifications: [],
+      privacy: [],
+    };
+    // Account ID + region. Change "EU1" if this account lives in a different region.
+    clevertap.account.push({ id: "W56-ZKK-6K7Z" }, "EU1");
+    clevertap.privacy.push({ optOut: false });
+    clevertap.privacy.push({ useIP: false });
+    clevertap.dismissSpamControl = true;
+
+    (function () {
+      var wzrk = document.createElement("script");
+      wzrk.type = "text/javascript";
+      wzrk.async = true;
+      wzrk.src =
+        ("https:" == document.location.protocol
+          ? "https://d2r1yp2w7bby2u.cloudfront.net"
+          : "http://static.clevertap.com") + "/js/clevertap.min.js";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(wzrk, s);
+    })();
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f3f5f7;
+      --surface: #ffffff;
+      --ink: #18212b;
+      --muted: #5d6b7a;
+      --line: #d9dfe5;
+      --accent: #e8590c;
+      --accent-ink: #ffffff;
+      --danger: #b42318;
+      --focus: #1b6ef3;
+      --sans: "DM Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      --mono: "DM Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #12171d;
+        --surface: #1b222a;
+        --ink: #e8edf2;
+        --muted: #93a1b0;
+        --line: #2e3844;
+        --accent: #ff7a33;
+        --accent-ink: #12171d;
+        --danger: #ff8a7a;
+        --focus: #6ba2ff;
+      }
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 2rem 1.25rem 3rem;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--sans);
+      line-height: 1.5;
+    }
+
+    .masthead,
+    .layout,
+    .displays,
+    .log-panel {
+      max-width: 1040px;
+      margin-inline: auto;
+    }
+
+    .masthead {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 0.5rem 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    h1 { margin: 0; font-size: 1.75rem; letter-spacing: -0.02em; }
+    h2 { margin: 0 0 0.75rem; font-size: 1.125rem; }
+    h3 { margin: 0 0 0.5rem; font-size: 0.875rem; color: var(--muted); font-weight: 500; }
+
+    .account { margin: 0; color: var(--muted); font-size: 0.9rem; }
+    .account strong { color: var(--ink); font-family: var(--mono); font-weight: 500; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 360px) minmax(0, 1fr);
+      gap: 1.25rem;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 1.25rem;
+    }
+
+    .hint { margin: -0.25rem 0 1rem; color: var(--muted); font-size: 0.875rem; }
+
+    label { display: block; margin: 0.75rem 0 0.25rem; font-size: 0.875rem; font-weight: 500; }
+
+    input {
+      width: 100%;
+      padding: 0.6rem 0.75rem;
+      font: inherit;
+      color: var(--ink);
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+    }
+
+    button {
+      font: inherit;
+      font-size: 0.9rem;
+      font-weight: 500;
+      padding: 0.55rem 0.9rem;
+      color: var(--ink);
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:hover { border-color: var(--muted); }
+    button:active { transform: translateY(1px); }
+
+    button.primary {
+      color: var(--accent-ink);
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+    button.primary:hover { filter: brightness(0.95); }
+
+    button.danger { color: var(--danger); }
+    button.quiet { border-color: transparent; color: var(--muted); background: transparent; }
+
+    #loginButton { margin-top: 1.25rem; width: 100%; }
+
+    input:focus-visible,
+    button:focus-visible {
+      outline: 2px solid var(--focus);
+      outline-offset: 2px;
+    }
+
+    .group + .group { margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--line); }
+    .row { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+    .displays {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+      margin-top: 1.25rem;
+    }
+    #ct-homepage-banner:empty { display: none; }
+
+    .slot {
+      min-height: 120px;
+      padding: 1.25rem;
+      background: var(--surface);
+      border: 1px dashed var(--line);
+      border-radius: 10px;
+    }
+    .slot h2 { margin-bottom: 0.25rem; }
+    .slot p { margin: 0.25rem 0; }
+    .slot button { margin-top: 0.75rem; }
+    .empty { color: var(--muted); }
+
+    .log-panel { margin-top: 1.25rem; }
+    .log-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; }
+    .log-head h2 { margin: 0; }
+
+    #log {
+      margin: 0;
+      padding: 0;
+      max-height: 260px;
+      overflow-y: auto;
+      list-style: none;
+      font-family: var(--mono);
+      font-size: 0.8125rem;
+    }
+    #log li { padding: 0.35rem 0; border-top: 1px solid var(--line); overflow-wrap: anywhere; }
+    #log li:first-child { border-top: 0; }
+    #log time { margin-right: 0.75rem; color: var(--muted); }
+
+    @media (max-width: 760px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="masthead">
+    <h1>CleverTap test bench</h1>
+    <p class="account">Account <strong>W56-ZKK-6K7Z</strong> on EU1</p>
+  </header>
+
+  <main class="layout">
+    <section class="panel" aria-labelledby="login-title">
+      <h2 id="login-title">User login</h2>
+      <p class="hint">Fill at least one of Identity or Email, then call onUserLogin.</p>
+
+      <label for="name">Name</label>
+      <input type="text" id="name" placeholder="Enter your name" autocomplete="off" />
+
+      <label for="identity">Identity</label>
+      <input type="text" id="identity" placeholder="Enter your identity" autocomplete="off" />
+
+      <label for="email">Email</label>
+      <input type="email" id="email" placeholder="Enter your email" autocomplete="off" />
+
+      <label for="phone">Phone</label>
+      <input type="tel" id="phone" placeholder="Include country code, e.g. +91..." autocomplete="off" />
+
+      <button id="loginButton" class="primary">onUserLogin</button>
+    </section>
+
+    <section class="panel" aria-labelledby="actions-title">
+      <h2 id="actions-title">Actions</h2>
+
+      <div class="group">
+        <h3>Session</h3>
+        <div class="row">
+          <button id="cleverTapID">Show CleverTap ID</button>
+          <button id="clearCookiesBtn" class="danger">Clear cookies and storage</button>
+        </div>
+      </div>
+
+      <div class="group">
+        <h3>Profile and events</h3>
+        <div class="row">
+          <button id="pushButton">Profile push</button>
+          <button id="viewProductButton">Add to cart</button>
+          <button id="nativeDisplay">Remove from cart</button>
+        </div>
+      </div>
+
+      <div class="group">
+        <h3>Campaign triggers</h3>
+        <div class="row">
+          <button id="enablePush">Enable push notifications</button>
+          <button id="sendPopup">Web pop-up</button>
+          <button id="nativeDisplay1">Web native KV</button>
+          <button id="exitIntent">Exit intent</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <section class="displays" aria-label="Campaign display areas">
+    <div id="ct-homepage-banner"></div>
+
+    <div id="ct-display1" class="slot">
+      <p class="empty">Welcome banner will appear here.</p>
+    </div>
+
+    <div id="ct-display2" class="slot">
+      <p class="empty">Cart drop-off message will appear here.</p>
+    </div>
+  </section>
+
+  <section class="panel log-panel" aria-labelledby="log-title">
+    <div class="log-head">
+      <h2 id="log-title">Activity log</h2>
+      <button id="clearLog" class="quiet">Clear log</button>
+    </div>
+    <ol id="log" aria-live="polite">
+      <li class="empty">Nothing sent yet.</li>
+    </ol>
+  </section>
+
+  <script>
+    // ===== Activity log =====
+    const logEl = document.getElementById("log");
+    const log = (message) => {
+      const empty = logEl.querySelector(".empty");
+      if (empty) empty.remove();
+      const li = document.createElement("li");
+      const time = document.createElement("time");
+      time.textContent = new Date().toLocaleTimeString();
+      li.appendChild(time);
+      li.appendChild(document.createTextNode(message));
+      logEl.prepend(li);
+      console.log(message);
+    };
+    document.getElementById("clearLog").addEventListener("click", () => {
+      logEl.innerHTML = '<li class="empty">Nothing sent yet.</li>';
+    });
+
+    // ===== Show CleverTap ID =====
+    document.getElementById("cleverTapID").addEventListener("click", () => {
+      const id = window.clevertap && clevertap.getCleverTapID && clevertap.getCleverTapID();
+      log(id ? "CleverTap ID: " + id : "CleverTap ID not available yet. Wait for the SDK to load and try again.");
+    });
+
+    // ===== onUserLogin =====
+    document.getElementById("loginButton").addEventListener("click", () => {
+      const name = document.getElementById("name").value.trim();
+      const identity = document.getElementById("identity").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+
+      if (!identity && !email) {
+        log("onUserLogin not sent: enter an Identity or an Email.");
+        return;
+      }
+
+      clevertap.onUserLogin.push({
+        Site: {
+          Name: name || undefined,
+          Identity: identity || undefined,
+          Email: email || undefined,
+          Phone: phone || undefined,
+        },
+      });
+      log("onUserLogin sent for " + (identity || email));
+    });
+
+    // ===== Profile push =====
+    document.getElementById("pushButton").addEventListener("click", () => {
+      clevertap.profile.push({
+        Site: {
+          Identity: "234",
+          "Prefered Language": "English",
+        },
+      });
+      log("Profile updated (Identity 234, Prefered Language English).");
+    });
+
+    // ===== Events =====
+    document.getElementById("viewProductButton").addEventListener("click", () => {
+      clevertap.event.push("add to cart", {
+        "Product name": "Casio Chronograph Watch",
+        Category: "Mens Accessories",
+        Price: 59.99,
+        Date: new Date(),
+      });
+      log('Event sent: "add to cart"');
+    });
+
+    document.getElementById("nativeDisplay").addEventListener("click", () => {
+      clevertap.event.push("remove from cart");
+      log('Event sent: "remove from cart"');
+    });
+
+    document.getElementById("sendPopup").addEventListener("click", () => {
+      clevertap.event.push("Web Session Started");
+      log('Event sent: "Web Session Started"');
+    });
+
+    document.getElementById("nativeDisplay1").addEventListener("click", () => {
+      clevertap.event.push("CustomEvent5");
+      log('Event sent: "CustomEvent5"');
+    });
+
+    document.getElementById("exitIntent").addEventListener("click", () => {
+      clevertap.event.push("Charged");
+      log('Event sent: "Charged"');
+    });
+
+    // ===== Web push permission =====
+    // The service worker is resolved relative to this page, so it works from any folder.
+    document.getElementById("enablePush").addEventListener("click", () => {
+      clevertap.notifications.push({
+        titleText: "Would you like to receive push notifications?",
+        bodyText: "We'll only send relevant updates about your activity.",
+        okButtonText: "Sign me up",
+        rejectButtonText: "No thanks",
+        okButtonColor: "#e8590c",
+        serviceWorkerPath: new URL("service_worker.js", location.href).pathname,
+      });
+      log("Push permission prompt requested.");
+    });
+
+    // ===== Clear cookies and storage =====
+    document.getElementById("clearCookiesBtn").addEventListener("click", async () => {
+      document.cookie.split(";").forEach((cookie) => {
+        const eqPos = cookie.indexOf("=");
+        const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/";
+      });
+
+      localStorage.clear();
+      sessionStorage.clear();
+
+      if (window.indexedDB && indexedDB.databases) {
+        const dbs = await indexedDB.databases();
+        for (const db of dbs) {
+          indexedDB.deleteDatabase(db.name);
+        }
+      }
+
+      location.reload();
+    });
+
+    // ===== Native display renderers =====
+    const renderCartDropOff = (data) => {
+      const { Name: name, Cart: product } = data.kv;
+      const el = document.getElementById("ct-display2");
+      if (!el) return;
+      el.innerHTML = "";
+
+      const title = document.createElement("h2");
+      title.innerText = `Hey ${name}, don't forget your cart!`;
+      const body = document.createElement("p");
+      body.innerText = `You left "${product}" in your cart.`;
+      el.append(title, body);
+
+      window.clevertap?.renderNotificationViewed(data);
+      el.addEventListener("click", () => {
+        window.clevertap?.renderNotificationClicked(data);
+        log("Native display clicked: Cart drop-off");
+      });
+      log("Native display rendered: Cart drop-off");
+    };
+
+    const renderWelcomeBanner = (data) => {
+      const { Name, Duration, Course, "Apply by": applyBy } = data.kv;
+      const el = document.getElementById("ct-display1");
+      if (!el) return;
+      el.innerHTML = "";
+
+      const heading = document.createElement("h2");
+      heading.innerText = `Welcome, ${Name}!`;
+      const course = document.createElement("p");
+      course.innerText = `Course: ${Course}`;
+      const duration = document.createElement("p");
+      duration.innerText = `Duration: ${Duration}`;
+      const applyByEl = document.createElement("p");
+      applyByEl.innerText = `Apply by: ${applyBy}`;
+
+      const cta = document.createElement("button");
+      cta.className = "primary";
+      cta.innerText = "Apply now";
+      cta.addEventListener("click", () => {
+        window.clevertap?.renderNotificationClicked(data);
+        log("Native display CTA clicked: Apply now");
+      });
+
+      el.append(heading, course, duration, applyByEl, cta);
+      window.clevertap?.renderNotificationViewed(data);
+      log("Native display rendered: WelcomeBanner");
+    };
+
+    document.addEventListener("CT_web_native_display", (event) => {
+      const data = event.detail;
+      const topic = data?.kv?.topic;
+
+      switch (topic) {
+        case "Cart drop-off":
+          renderCartDropOff(data);
+          break;
+        case "WelcomeBanner":
+          renderWelcomeBanner(data);
+          break;
+        default:
+          log("Unhandled native display topic: " + topic);
+      }
+    });
+
+    // ===== Style the exit-intent close icon (retries while the iframe loads) =====
+    window.addEventListener("load", () => {
+      let attempts = 0;
+      const timer = setInterval(() => {
+        const iframe = document.querySelector('iframe[id^="wiz-iframe-intent"]');
+        if (iframe && iframe.contentDocument) {
+          const style = iframe.contentDocument.createElement("style");
+          style.innerHTML = ".ct-close-icon { background-color: red !important; color: white !important; }";
+          iframe.contentDocument.head.appendChild(style);
+          clearInterval(timer);
+        } else if (++attempts > 20) {
+          clearInterval(timer);
+        }
+      }, 500);
+    });
+  </script>
+</body>
+
+</html>
